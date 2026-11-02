@@ -41,3 +41,22 @@ export function createTask(input: TaskInput): Task {
   tasks.push(task);
   return task;
 }
+
+export function getTask(id: string) {
+  return tasks.find((t) => t.id === id);
+}
+
+export function updateTask(id: string, input: TaskInput): Task | undefined {
+  const task = getTask(id);
+  if (!task) return undefined;
+  task.titulo = input.titulo;
+  task.descricao = input.descricao || undefined;
+  return task;
+}
+
+export function deleteTask(id: string): boolean {
+  const index = tasks.findIndex((t) => t.id === id);
+  if (index === -1) return false;
+  tasks.splice(index, 1);
+  return true;
+}
