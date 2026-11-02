@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
-import { PAGE_SIZE } from "@/lib/schemas";
-import { listTasks } from "./store";
+import { PAGE_SIZE, taskInput } from "@/lib/schemas";
+import { createTask, listTasks } from "./store";
 import { publicProcedure, router } from "./trpc";
 
 const taskRouter = router({
@@ -14,6 +14,8 @@ const taskRouter = router({
       }),
     )
     .query(({ input }) => listTasks(input.cursor ?? 0, input.limit)),
+  create: publicProcedure
+    .input(taskInput).mutation(({ input }) => createTask(input)),
 });
 
 export const appRouter = router({ task: taskRouter });

@@ -1,4 +1,5 @@
 import "server-only";
+import type { TaskInput } from "@/lib/schemas";
 
 export type Task = {
   id: string;
@@ -28,4 +29,15 @@ export function listTasks(cursor: number, limit: number) {
   const items = sorted.slice(cursor, cursor + limit);
   const nextCursor = cursor + limit < sorted.length ? cursor + limit : null;
   return { items, nextCursor };
+}
+
+export function createTask(input: TaskInput): Task {
+  const task: Task = {
+    id: crypto.randomUUID(),
+    titulo: input.titulo,
+    descricao: input.descricao || undefined, // treat "" as "no description"
+    dataCriacao: Date.now(),
+  };
+  tasks.push(task);
+  return task;
 }
