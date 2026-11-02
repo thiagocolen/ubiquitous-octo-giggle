@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PAGE_SIZE = 10;
+export const PAGE_SIZE = 5;
 
 // Shared by the form (client-side validation) and the tRPC procedures
 // (server-side validation): one source of truth for the rules.
