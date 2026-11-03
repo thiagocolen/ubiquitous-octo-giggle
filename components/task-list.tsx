@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatDate } from "@/lib/format";
 import { PAGE_SIZE } from "@/lib/schemas";
@@ -11,10 +12,22 @@ import type { AppRouter } from "@/server/router";
 type TaskPage = inferRouterOutputs<AppRouter>["task"]["list"];
 type Message = { type: "success" | "error"; text: string };
 
-export function TaskList({ initialPage }: { initialPage: TaskPage }) {
+const STATUS_MESSAGES: Record<string, string> = {
+  created: "Tarefa criada com sucesso.",
+  updated: "Tarefa atualizada com sucesso.",
+};
+
+export function TaskList({ initialPage, status }: { initialPage: TaskPage; status?: string }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [message, setMessage] = useState<Message | null>(null);
+  const router = useRouter();
+  const [message, setMessage] = useState<Message | null>(
+    status && STATUS_MESSAGES[status] ? { type: "success", text: STATUS_MESSAGES[status] } : null,
+  );
+
+  useEffect(() => {
+    if (status) router.replace("/", { scroll: false });
+  }, [status, router]);
 
   // Auto-dismiss messages.
   useEffect(() => {
