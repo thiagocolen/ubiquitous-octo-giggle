@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useRouter } from "next/navigation";
@@ -85,6 +86,13 @@ export function TaskList({ initialPage, status }: { initialPage: TaskPage; statu
                   <time className="text-xs text-gray-400">{formatDate(task.dataCriacao)}</time>
                 </div>
                 <div className="flex shrink-0 gap-2 text-sm">
+                  <Link 
+                    href={`/tasks/${task.id}/edit`} 
+                    className="text-blue-600"
+                  >
+                    Editar
+                  </Link>
+
                   <button
                     type="button"
                     disabled={isDeleting}

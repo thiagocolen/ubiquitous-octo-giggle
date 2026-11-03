@@ -9,15 +9,19 @@ import { z } from "zod";
 import { taskInput } from "@/lib/schemas";
 import { useTRPC } from "@/lib/trpc/client";
 import type { AppRouter } from "@/server/router";
+import type { Task } from "@/server/store";
 
 type FieldErrors = Partial<Record<"titulo" | "descricao", string[]>>;
 
-export function TaskForm() {
+export function TaskForm({ task }: { task?: Task }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [values, setValues] = useState({ titulo: "", descricao: "" });
+  const [values, setValues] = useState({
+    titulo: task?.titulo ?? "",
+    descricao: task?.descricao ?? "",
+  });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -40,7 +44,10 @@ export function TaskForm() {
   const create = useMutation(
     trpc.task.create.mutationOptions({ onSuccess: () => handleSuccess("created"), onError: handleError }),
   );
-  const isPending = create.isPending;
+  const update = useMutation(
+    trpc.task.update.mutationOptions({ onSuccess: () => handleSuccess("updated"), onError: handleError }),
+  );
+  const isPending = create.isPending || update.isPending;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,7 +61,8 @@ export function TaskForm() {
     }
     setFieldErrors({});
 
-    create.mutate(parsed.data);
+    if (task) update.mutate({ id: task.id, ...parsed.data });
+    else create.mutate(parsed.data);
   }
 
   // noValidate: let the Zod messages (same wording as the server) be the ones the user sees.
@@ -93,7 +101,7 @@ export function TaskForm() {
           disabled={isPending}
           className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
         >
-          {isPending ? "Salvando…" : "Criar tarefa"}
+           {isPending ? "Salvando…" : task ? "Salvar alterações" : "Criar tarefa"}
         </button>
         <Link href="/" className="px-4 py-2">Cancelar</Link>
       </div>
