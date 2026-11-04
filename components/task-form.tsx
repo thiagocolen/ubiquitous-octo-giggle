@@ -53,7 +53,6 @@ export function TaskForm({ task }: { task?: Task }) {
     e.preventDefault();
     setFormError(null);
 
-    // Same schema as the server: block submission before any request is sent.
     const parsed = taskInput.safeParse(values);
     if (!parsed.success) {
       setFieldErrors(z.flattenError(parsed.error).fieldErrors);
@@ -65,7 +64,6 @@ export function TaskForm({ task }: { task?: Task }) {
     else create.mutate(parsed.data);
   }
 
-  // noValidate: let the Zod messages (same wording as the server) be the ones the user sees.
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       {formError && <p role="alert" className="rounded bg-red-100 p-2 text-red-800">{formError}</p>}

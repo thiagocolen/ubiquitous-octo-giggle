@@ -3,7 +3,6 @@ import { initTRPC } from "@trpc/server";
 import { z } from "zod";
 
 const t = initTRPC.create({
-  // Expose field-level validation errors so the form can show them next to each input.
   errorFormatter({ shape, error }) {
     return {
       ...shape,

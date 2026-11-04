@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // compoment level caching
+  // instead of page level caching
   cacheComponents: true,
+
+  // performance optimization
   partialPrefetching: true,
+
+  // how turbopack should handle tailwindcss
   turbopack: {
     rules: {
       "*.css": {

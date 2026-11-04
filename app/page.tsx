@@ -5,6 +5,7 @@ import { PAGE_SIZE } from "@/lib/schemas";
 import { caller } from "@/lib/trpc/server";
 
 export default async function HomePage({ searchParams }: PageProps<"/">) {
+  // connecting with backend
   await connection();
 
   const { status } = await searchParams;

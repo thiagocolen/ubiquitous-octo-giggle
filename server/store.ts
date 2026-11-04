@@ -5,15 +5,12 @@ export type Task = {
   id: string;
   titulo: string;
   descricao?: string;
-  dataCriacao: number; // Unix ms: serializes as plain JSON, no transformer needed
+  dataCriacao: number; 
 };
 
-// Keep the array on globalThis so it survives dev hot reloads and is shared
-// between the route handler and Server Component bundles.
 const globalForStore = globalThis as unknown as { tasks?: Task[] };
 const tasks: Task[] = (globalForStore.tasks ??= seed());
 
-// Fictitious seed data with deterministic ids/dates, enough to demo infinite scroll.
 function seed(): Task[] {
   const base = Date.UTC(2026, 0, 1);
   return Array.from({ length: 10000 }, (_, i) => ({
