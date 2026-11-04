@@ -7,14 +7,11 @@ import { publicProcedure, router } from "./trpc";
 
 const idInput = z.object({ id: z.string().min(1) });
 
-// The store returns undefined/false; turning that into a TRPCError here keeps
-// the data layer independent of the transport.
 function notFound(id: string): never {
   throw new TRPCError({ code: "NOT_FOUND", message: `Tarefa "${id}" não encontrada.` });
 }
 
 const taskRouter = router({
-  // `cursor` is the name tRPC looks for to enable infiniteQueryOptions on the client.
   list: publicProcedure
     .input(
       z.object({
@@ -40,5 +37,4 @@ const taskRouter = router({
 
 export const appRouter = router({ task: taskRouter });
 
-// Only the *type* is shared with the client: no server code goes to the browser.
 export type AppRouter = typeof appRouter;

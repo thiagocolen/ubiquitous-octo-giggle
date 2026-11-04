@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDate } from "@/lib/format";
 import { PAGE_SIZE } from "@/lib/schemas";
 import { useTRPC } from "@/lib/trpc/client";
@@ -30,15 +30,13 @@ export function TaskList({ initialPage, status }: { initialPage: TaskPage; statu
     if (status) router.replace("/", { scroll: false });
   }, [status, router]);
 
-  // Auto-dismiss messages.
   useEffect(() => {
     if (!message) return;
     const timer = setTimeout(() => setMessage(null), 4000);
     return () => clearTimeout(timer);
   }, [message]);
 
-  // SSR data seeds the cache, so the first render needs no client fetch.
-  const { data, error } = useInfiniteQuery(
+  const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery(
     trpc.task.list.infiniteQueryOptions(
       { limit: PAGE_SIZE },
       {
@@ -52,12 +50,25 @@ export function TaskList({ initialPage, status }: { initialPage: TaskPage; statu
     trpc.task.delete.mutationOptions({
       onSuccess: () => {
         setMessage({ type: "success", text: "Tarefa excluída com sucesso." });
-        // Offsets shift after a delete, so refetch the whole list.
         return queryClient.invalidateQueries(trpc.task.list.pathFilter());
       },
       onError: (err) => setMessage({ type: "error", text: err.message }),
     }),
   );
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isFetchingNextPage) fetchNextPage();
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const tasks = data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -86,8 +97,8 @@ export function TaskList({ initialPage, status }: { initialPage: TaskPage; statu
                   <time className="text-xs text-gray-400">{formatDate(task.dataCriacao)}</time>
                 </div>
                 <div className="flex shrink-0 gap-2 text-sm">
-                  <Link 
-                    href={`/tasks/${task.id}/edit`} 
+                  <Link
+                    href={`/tasks/${task.id}/edit`}
                     className="text-blue-600"
                   >
                     Editar
@@ -109,6 +120,13 @@ export function TaskList({ initialPage, status }: { initialPage: TaskPage; statu
           );
         })}
       </ul>
+      <div ref={sentinelRef} />
+
+      {isFetchingNextPage && <p className="text-center text-gray-500">Carregando mais…</p>}
+
+      {!hasNextPage && tasks.length > 0 && (
+        <p className="text-center text-xs text-gray-400">Fim da lista.</p>
+      )}
     </div>
   );
 }

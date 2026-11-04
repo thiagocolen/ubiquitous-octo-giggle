@@ -16,7 +16,7 @@ const tasks: Task[] = (globalForStore.tasks ??= seed());
 // Fictitious seed data with deterministic ids/dates, enough to demo infinite scroll.
 function seed(): Task[] {
   const base = Date.UTC(2026, 0, 1);
-  return Array.from({ length: 25 }, (_, i) => ({
+  return Array.from({ length: 10000 }, (_, i) => ({
     id: `seed-${i + 1}`,
     titulo: `Tarefa de exemplo ${i + 1}`,
     descricao: i % 3 === 0 ? undefined : `Descrição fictícia da tarefa ${i + 1}.`,
